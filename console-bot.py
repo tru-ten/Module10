@@ -15,7 +15,7 @@ class Record:
         self.name = name
         self.phones = []
         if phone:
-            self.phones.append(phone.value)
+            self.phones.append(phone)
 
     def add_phone(self, phone):
         self.phones.append(phone.value)
@@ -26,13 +26,13 @@ class Record:
         except:
             print(f'Phone {phone.value} is not listed')
 
-    def change_phone(self, OldPhone, NewPhone):
+    def change_phone(self, old_phone, new_phone):
         try:
-            index_phone = self.phones.index(OldPhone.value)
+            index_phone = self.phones.index(old_phone)
             self.phones.pop(index_phone)
-            self.phones.insert(index_phone, NewPhone.value)
+            self.phones.insert(index_phone, new_phone)
         except ValueError:
-            print(f'Phone {OldPhone.value} is not listed')
+            print(f'Phone {old_phone.value} is not listed')
 
 class AddressBook(UserDict):
     def add_record(self, record):
@@ -60,7 +60,7 @@ def error_handler(func):
         except ValueError:
             return 'Give me name and phone please'
         except IndexError:
-            return 'Enter user name'
+            return 'Not enough parameters'
     return inner
 
 def hello_user(args):
@@ -84,9 +84,9 @@ def add_user(args):
 def change_phone(args):
     name = Name(args[0])
     phone = Phone(args[1])
-    old_phone = Phone(contact_book[name.value])
+    phones = list(map(lambda x: x.value, contact_book[name.value]))
+    old_phone = Phone(phones)
     rec = Record(name, old_phone)
-    contact_book.delete_record(rec)
     rec.change_phone(old_phone, phone)
     contact_book.add_record(rec)
     return f'{name.value} now has a phone: {phone.value}\nOld number: {old_phone.value}'
@@ -94,7 +94,8 @@ def change_phone(args):
 def show_all(args):
     if len(contact_book)>0:
         result = ''
-        for name, phone in contact_book.items():
+        for name, phones in contact_book.items():
+            phone = list(map(lambda x: x.value, phones))
             result += f'Name: {name} phone: {phone}\n'
         return result
     return 'Contact book is empty'
@@ -102,7 +103,8 @@ def show_all(args):
 @error_handler
 def show_phone(args):
     name = Name(args[0])
-    phone = Phone(contact_book[name.value])
+    phones = list(map(lambda x: x.value, contact_book[name.value]))
+    phone = Phone(phones)
     return f'Phone: {phone.value}'
 
 HANDLERS = {
